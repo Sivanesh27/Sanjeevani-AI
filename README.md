@@ -74,4 +74,4 @@ doctor. A production version would need a licensed pharmacist to maintain
 and expand the interaction database against authoritative references.
 
 ## Team
-[Your Team Name] — PHARMINNO QUEST 2026
+Monochrome— PHARMINNO QUEST 2026
