@@ -1,0 +1,206 @@
+:root {
+  --green: #0E3B2E;
+  --green-soft: #14503E;
+  --cream: #FBF7F0;
+  --orange: #D98E30;
+  --sage: #9FB8AC;
+  --ink: #1C1F1B;
+  --muted: #44483F;
+  --severe: #B23B3B;
+  --moderate: #D98E30;
+  --mild: #5C8A6A;
+  --white: #FFFFFF;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Noto Sans", "Noto Sans Devanagari", "Noto Sans Tamil", Arial, sans-serif;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.hidden { display: none !important; }
+
+.phone {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.08);
+}
+
+.topBar {
+  background: var(--green);
+  color: var(--white);
+  padding: 18px 20px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topBar .brand { display: flex; align-items: center; gap: 10px; }
+.topBar .brandMark {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--orange); display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.topBar h1 { font-size: 17px; margin: 0; font-weight: 700; }
+.topBar .badge { font-size: 11px; opacity: 0.85; }
+
+.langRow { display: flex; gap: 6px; }
+.langSwitch {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: var(--white);
+  font-size: 11px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.langSwitch.active, .langSwitch:hover { background: var(--orange); border-color: var(--orange); }
+
+.screen { flex: 1; padding: 22px 20px 100px; }
+
+/* ---- Language / onboarding ---- */
+.centerScreen { display: flex; flex-direction: column; justify-content: center; min-height: 100vh; padding: 32px; }
+.heroMark {
+  width: 64px; height: 64px; border-radius: 18px; background: var(--green);
+  display: flex; align-items: center; justify-content: center; font-size: 30px;
+  margin-bottom: 18px; color: var(--white);
+}
+.heroTitle { font-size: 26px; font-weight: 800; color: var(--green); margin: 0 0 6px; }
+.heroTag { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+.stepLabel { font-size: 13px; color: var(--muted); margin-bottom: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+
+.langGrid { display: flex; flex-direction: column; gap: 10px; }
+.langCard {
+  padding: 16px; border-radius: 12px; border: 1.5px solid var(--sage);
+  background: var(--white); font-size: 16px; font-weight: 600; color: var(--ink);
+  cursor: pointer; text-align: left;
+}
+.langCard:hover { border-color: var(--orange); background: #FFF6EA; }
+
+.formField { margin-bottom: 14px; }
+.formField label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.formField input {
+  width: 100%; padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--sage);
+  font-size: 15px; background: var(--white);
+}
+.primaryBtn {
+  width: 100%; padding: 14px; border-radius: 12px; border: none;
+  background: var(--orange); color: var(--white); font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-top: 8px;
+}
+.primaryBtn:hover { background: #c17f26; }
+
+/* ---- Search / cabinet ---- */
+.sectionTitle { font-size: 19px; font-weight: 800; color: var(--green); margin: 0 0 4px; }
+.sectionSub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+.searchBox { display: flex; gap: 8px; margin-bottom: 6px; }
+.searchBox input {
+  flex: 1; padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--sage); font-size: 14px;
+}
+.scanBtn {
+  border: 1.5px solid var(--green); background: var(--white); color: var(--green);
+  border-radius: 10px; padding: 0 14px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap;
+}
+.scanStatus { font-size: 12px; color: var(--orange); margin: 6px 0; font-weight: 600; }
+.scanHelp { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+
+.searchResults { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.resultRow {
+  display: flex; align-items: center; gap: 10px; background: var(--white);
+  border: 1px solid var(--sage); border-radius: 10px; padding: 10px 12px;
+}
+.resultIcon { font-size: 20px; }
+.resultInfo { flex: 1; }
+.resultName { font-weight: 700; font-size: 13.5px; }
+.resultMeta { font-size: 11.5px; color: var(--muted); }
+.addBtn {
+  background: var(--green); color: var(--white); border: none; border-radius: 8px;
+  padding: 7px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.noMatch { font-size: 13px; color: var(--muted); padding: 10px; }
+
+.cabinetList { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.pillChip {
+  display: flex; align-items: center; gap: 6px; background: var(--white);
+  border: 1px solid var(--sage); border-radius: 999px; padding: 7px 10px 7px 12px; font-size: 12.5px; font-weight: 600;
+}
+.pillIcon { font-size: 15px; }
+.pillRemove {
+  border: none; background: #eee; color: var(--muted); border-radius: 50%;
+  width: 18px; height: 18px; font-size: 10px; cursor: pointer; line-height: 1;
+}
+.emptyState { color: var(--muted); font-size: 13.5px; padding: 14px 0; }
+
+/* ---- Risk cards ---- */
+.riskSummary {
+  font-weight: 800; font-size: 13.5px; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px;
+  background: #FDEDED; color: var(--severe); display: inline-block;
+}
+.riskCard {
+  background: var(--white); border-radius: 12px; padding: 14px; margin-bottom: 10px;
+  border-left: none; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.riskCard.allClear { color: var(--mild); font-weight: 700; font-size: 13.5px; }
+.riskHeader { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+.sevBadge { font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 999px; color: var(--white); text-transform: uppercase; letter-spacing: 0.03em; }
+.sevBadge.severe { background: var(--severe); }
+.sevBadge.moderate { background: var(--moderate); }
+.sevBadge.mild { background: var(--mild); }
+.riskPair { font-weight: 700; font-size: 12.5px; color: var(--ink); }
+.riskTitle { font-weight: 800; font-size: 14.5px; margin-bottom: 6px; color: var(--green); }
+.riskRow { font-size: 12.5px; color: var(--muted); margin-bottom: 4px; line-height: 1.4; }
+.speakBtn {
+  margin-top: 8px; border: 1px solid var(--green); background: var(--white); color: var(--green);
+  border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.demoNote { font-size: 10.5px; color: var(--muted); font-style: italic; margin-top: 6px; }
+
+/* ---- Schedule ---- */
+.scheduleSlot { margin-bottom: 16px; }
+.slotHeader { font-weight: 800; font-size: 14.5px; color: var(--green); margin-bottom: 8px; }
+.slotItems { display: flex; flex-direction: column; gap: 8px; }
+.slotItem {
+  display: flex; align-items: center; gap: 10px; background: var(--white);
+  border: 1px solid var(--sage); border-radius: 10px; padding: 10px 12px;
+}
+.slotName { flex: 1; font-weight: 700; font-size: 13px; }
+.foodTag { font-size: 11px; background: #F1EBDD; color: var(--muted); padding: 3px 8px; border-radius: 999px; font-weight: 600; }
+
+/* ---- Pharmacist dashboard ---- */
+.statRow { display: flex; gap: 10px; margin-bottom: 18px; }
+.statCard { flex: 1; background: var(--white); border: 1px solid var(--sage); border-radius: 12px; padding: 14px 8px; text-align: center; }
+.statCard.severe { border-color: var(--severe); background: #FDEDED; }
+.statCard.moderate { border-color: var(--moderate); background: #FCF1E2; }
+.statCard.mild { border-color: var(--mild); background: #EFF6F1; }
+.statNum { font-size: 20px; font-weight: 800; color: var(--green); }
+.statLabel { font-size: 10.5px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+.pharmMedList { margin-bottom: 14px; }
+.pharmMedRow { font-size: 13px; padding: 8px 0; border-bottom: 1px dashed var(--sage); font-weight: 600; }
+
+/* ---- Bottom nav ---- */
+.navBar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px; background: var(--white); border-top: 1px solid var(--sage);
+  display: flex; justify-content: space-around; padding: 10px 6px 14px;
+}
+.navBtn {
+  background: none; border: none; font-size: 11px; font-weight: 700; color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 4px 8px;
+}
+.navBtn .navIcon { font-size: 19px; }
+.navBtn.active { color: var(--orange); }
+
+.footNote { font-size: 10.5px; color: var(--muted); text-align: center; margin-top: 18px; line-height: 1.5; }
+
+@media print {
+  .navBar, .topBar .langRow { display: none; }
+}
