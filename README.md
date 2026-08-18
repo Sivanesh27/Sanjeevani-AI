@@ -1,17 +1,3 @@
----
-title: Sanjeevani AI API
-emoji: 🏥
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 7860
-pinned: false
----
-
-# Sanjeevani AI API
-
-AI-powered healthcare backend API for the Sanjeevani platform.
-
 # SanjeevaniAI — Industry-Grade Healthcare AI Platform
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
