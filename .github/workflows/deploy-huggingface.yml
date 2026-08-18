@@ -21,6 +21,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           lfs: true
 
       - name: Configure Git
@@ -32,4 +33,4 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git push https://Sivaneshakumar:${HF_TOKEN}@huggingface.co/spaces/Sivaneshakumar/sanjeevani-api HEAD:main --force
+          git push https://Sivaneshakumar:${HF_TOKEN}@huggingface.co/spaces/Sivaneshakumar/sanjeevani-api main --force
