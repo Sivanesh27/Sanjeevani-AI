@@ -1,5 +1,6 @@
 ---
 title: Sanjeevani AI API
+emoji: 🏥
 colorFrom: blue
 colorTo: indigo
 sdk: gradio
@@ -8,6 +9,11 @@ python_version: "3.11"
 app_file: app.py
 pinned: false
 ---
+
+# Sanjeevani AI API
+
+AI-powered healthcare backend API for the Sanjeevani platform.
+
 # SanjeevaniAI — Industry-Grade Healthcare AI Platform
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
