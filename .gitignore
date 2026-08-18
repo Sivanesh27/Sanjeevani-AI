@@ -1,0 +1,52 @@
+# Python & Virtual Environments
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+*.log
+
+# Sensitive Credentials
+.env
+.env.local
+.env.*.local
+
+# Database & Uploads
+*.db
+sanjeevani.db
+uploads/*
+!uploads/.gitkeep
+
+# Large Pretrained ML Model Weights (>100MB exceeds GitHub push limit)
+# Note: Cloud deployment automatically fetches 'tner/roberta-large-bc5cdr' from HuggingFace
+models/
+models/*
+!models/.gitkeep
+checkpoints/
+checkpoints/*
+datasets/
+datasets/*
+
+# Legacy Prototype Folders
+app/
+clinical_engine/
+evaluation/
+rag/
+training/
+
+# Node.js & Next.js Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.vercel/
+frontend/out/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# IDE & OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
