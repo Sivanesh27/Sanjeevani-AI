@@ -5,10 +5,17 @@ except ImportError:
     has_spaces = False
 
 import os
-import uvicorn
 import gradio as gr
+from fastapi.middleware.cors import CORSMiddleware
 from backend.app.main import app as fastapi_app
 from backend.app.ml.manager import model_manager
+from backend.app.core.config import settings
+
+# Initialize model manager at startup
+try:
+    model_manager.initialize()
+except Exception as e:
+    print(f"ML Model initialization: {e}")
 
 # ZeroGPU worker function
 if has_spaces:
@@ -40,7 +47,7 @@ else:
 with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     gr.Markdown("# 🏥 SanjeevaniAI — Healthcare Intelligence API Engine")
     gr.Markdown(
-        "This Space powers the backend REST API for **SanjeevaniAI** (FastAPI + Local RoBERTa BC5CDR Named Entity Recognition on ZeroGPU).\n\n"
+        "This Space powers the backend REST API for **SanjeevaniAI** on ZeroGPU.\n\n"
         "- **API Health Endpoint**: `/api/v1/health`\n"
         "- **Interactive OpenAPI Swagger Docs**: `/docs`\n"
         "- **NER Analysis**: `/api/v1/ner/analyze`"
@@ -51,9 +58,15 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
     btn.click(fn=predict_ner, inputs=inp, outputs=out)
 
-# Mount Gradio UI under /gradio so FastAPI handles / and all /api/v1/ routes directly with zero SvelteKit interference
+# Mount Gradio UI under /gradio so FastAPI handles root / and all /api/v1/ routes directly with zero SvelteKit interference
 app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 
+# Add convenience root health endpoint
+@app.get("/health", tags=["Health"])
+async def root_health():
+    return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"}
+
 if __name__ == "__main__":
+    import uvicorn
     port = int(os.environ.get("PORT", 7860))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run("app:app", host="0.0.0.0", port=port)
