@@ -6,13 +6,16 @@ except ImportError:
 
 import os
 import gradio as gr
-from fastapi.middleware.cors import CORSMiddleware
-from backend.app.api.v1.router import api_router
+from backend.app.main import app as fastapi_app
 from backend.app.ml.manager import model_manager
-from backend.app.core.database import init_db
 from backend.app.core.config import settings
 
-# ZeroGPU synchronous worker
+# Initialize model manager at startup
+try:
+    model_manager.initialize()
+except Exception as e:
+    print(f"ML Model initialization: {e}")
+
 if has_spaces:
     @spaces.GPU
     def predict_ner(text: str):
@@ -53,32 +56,13 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
     btn.click(fn=predict_ner, inputs=inp, outputs=out)
 
-# 1. Enable full CORS for Vercel and cross-origin clients
-demo.app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Mount Gradio UI under /gradio to prevent SvelteKit from intercepting root /api/v1/ POST requests
+app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 
-# 2. Async startup event: initialize database schema & models
-@demo.app.on_event("startup")
-async def startup_event():
-    await init_db()
-    try:
-        model_manager.initialize()
-    except Exception as e:
-        print(f"ML Model initialization notice: {e}")
-
-# 3. Mount all REST API endpoints under /api/v1
-demo.app.include_router(api_router, prefix="/api/v1")
-
-# 4. Convenience health check alias
-@demo.app.get("/health", tags=["Health"])
+# Add convenience root health endpoint
+@fastapi_app.get("/health", tags=["Health"])
 async def root_health():
-    return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION}
+    return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"}
 
 if __name__ == "__main__":
-    # Disable experimental SSR so SvelteKit does not block incoming POST requests
-    demo.launch(server_name="0.0.0.0", server_port=7860, ssr=False)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
