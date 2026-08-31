@@ -5,15 +5,13 @@ except ImportError:
     has_spaces = False
 
 import os
+import uvicorn
 import gradio as gr
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from backend.app.api.v1.router import api_router
+from backend.app.main import app as fastapi_app
 from backend.app.ml.manager import model_manager
-from backend.app.core.database import init_db
 from backend.app.core.config import settings
 
-# ZeroGPU synchronous worker function
+# ZeroGPU worker function
 if has_spaces:
     @spaces.GPU
     def predict_ner(text: str):
@@ -54,31 +52,14 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
     btn.click(fn=predict_ner, inputs=inp, outputs=out)
 
-# Enable CORS on Gradio's internal FastAPI app
-demo.app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Mount Gradio UI under /gradio so FastAPI handles root / and all /api/v1/ routes directly with zero interference
+app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 
-# Initialize database tables and models on startup
-@demo.app.on_event("startup")
-async def startup_init():
-    await init_db()
-    try:
-        model_manager.initialize()
-    except Exception as e:
-        print(f"ML Model initialization notice: {e}")
-
-# Mount all FastAPI REST API routes
-demo.app.include_router(api_router, prefix="/api/v1")
-
-# Convenience root health check
-@demo.app.get("/health", tags=["Health"])
+# Add convenience root health endpoint
+@app.get("/health", tags=["Health"])
 async def root_health():
-    return JSONResponse(content={"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"})
+    return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"}
 
 if __name__ == "__main__":
-    demo.launch()
+    port = int(os.environ.get("PORT", 7860))
+    uvicorn.run(app, host="0.0.0.0", port=port)
