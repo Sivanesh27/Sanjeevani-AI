@@ -1,6 +1,5 @@
 import os
 import gradio as gr
-import uvicorn
 
 # ZeroGPU integration
 try:
@@ -31,7 +30,3 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
 
 from backend.app.main import app as fastapi_app
 app = gr.mount_gradio_app(fastapi_app, demo, path="/")
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 7860))
-    uvicorn.run(app, host="0.0.0.0", port=port)
