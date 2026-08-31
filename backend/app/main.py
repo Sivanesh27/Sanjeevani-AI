@@ -59,7 +59,7 @@ def create_application() -> FastAPI:
     @app.exception_handler(SanjeevaniException)
     async def sanjeevani_exception_handler(request: Request, exc: SanjeevaniException):
         req_id = getattr(request.state, "request_id", None)
-        logger.error(f"Domain error [{exc.code}]: {exc.message} (Request ID: {req_id})")
+        logger.error(f"[{exc.code}] {exc.message} (Request ID: {req_id})")
         return JSONResponse(
             status_code=exc.status_code,
             content={
@@ -112,6 +112,15 @@ def create_application() -> FastAPI:
 
     # Register API v1 routes
     app.include_router(api_router, prefix="/api/v1")
+
+    # Convenience root health check aliases
+    @app.get("/health", tags=["Root"])
+    async def root_health():
+        return {
+            "status": "healthy",
+            "app": settings.APP_NAME,
+            "version": settings.APP_VERSION,
+        }
 
     # Root redirect / status
     @app.get("/", tags=["Root"])
