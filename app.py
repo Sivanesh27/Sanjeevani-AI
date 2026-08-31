@@ -5,14 +5,12 @@ except ImportError:
     has_spaces = False
 
 import os
+import uvicorn
 import gradio as gr
-from fastapi.middleware.cors import CORSMiddleware
-from backend.app.api.v1.router import api_router
+from backend.app.main import app as fastapi_app
 from backend.app.ml.manager import model_manager
-from backend.app.core.database import init_db
-from backend.app.core.config import settings
 
-# ZeroGPU synchronous worker
+# ZeroGPU worker function
 if has_spaces:
     @spaces.GPU
     def predict_ner(text: str):
@@ -42,7 +40,7 @@ else:
 with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     gr.Markdown("# 🏥 SanjeevaniAI — Healthcare Intelligence API Engine")
     gr.Markdown(
-        "This Space powers the backend REST API for **SanjeevaniAI** on ZeroGPU.\n\n"
+        "This Space powers the backend REST API for **SanjeevaniAI** (FastAPI + Local RoBERTa BC5CDR Named Entity Recognition on ZeroGPU).\n\n"
         "- **API Health Endpoint**: `/api/v1/health`\n"
         "- **Interactive OpenAPI Swagger Docs**: `/docs`\n"
         "- **NER Analysis**: `/api/v1/ner/analyze`"
@@ -53,31 +51,9 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
     btn.click(fn=predict_ner, inputs=inp, outputs=out)
 
-# 1. Enable full CORS for Vercel
-demo.app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# 2. Async database & model init
-@demo.app.on_event("startup")
-async def startup_event():
-    await init_db()
-    try:
-        model_manager.initialize()
-    except Exception as e:
-        print(f"ML Model initialization notice: {e}")
-
-# 3. Mount all REST API endpoints under /api/v1
-demo.app.include_router(api_router, prefix="/api/v1")
-
-# 4. Convenience health check aliases
-@demo.app.get("/health", tags=["Health"])
-async def root_health():
-    return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"}
+# Mount Gradio UI under /gradio so FastAPI handles / and all /api/v1/ routes directly with zero SvelteKit interference
+app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 
 if __name__ == "__main__":
-    demo.launch()
+    port = int(os.environ.get("PORT", 7860))
+    uvicorn.run(app, host="0.0.0.0", port=port)
