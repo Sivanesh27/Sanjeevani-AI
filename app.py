@@ -1,47 +1,25 @@
-try:
-    import spaces
-    has_spaces = True
-except ImportError:
-    has_spaces = False
-
+import spaces  # ZeroGPU MUST be imported on line 1
 import os
+import uvicorn
 import gradio as gr
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from starlette.requests import Request
-from backend.app.api.v1.router import api_router
+from backend.app.main import app as fastapi_app
 from backend.app.ml.manager import model_manager
-from backend.app.core.database import init_db
-from backend.app.core.config import settings
 
-# 1. ZeroGPU Synchronous Worker Function (Required by ZeroGPU supervisor)
-if has_spaces:
-    @spaces.GPU
-    def predict_ner(text: str):
-        if not text or not text.strip():
-            return "Please provide clinical text."
-        try:
-            model = model_manager.get_ner_model()
-            results = model.predict(text)
-            if not results:
-                return "No biomedical entities detected."
-            return "\n".join([f"• [{e.label}] {e.text} (Confidence: {round((e.confidence or 1.0)*100, 1)}%)" for e in results])
-        except Exception as e:
-            return f"Inference notice: {e}"
-else:
-    def predict_ner(text: str):
-        if not text or not text.strip():
-            return "Please provide clinical text."
-        try:
-            model = model_manager.get_ner_model()
-            results = model.predict(text)
-            if not results:
-                return "No biomedical entities detected."
-            return "\n".join([f"• [{e.label}] {e.text} (Confidence: {round((e.confidence or 1.0)*100, 1)}%)" for e in results])
-        except Exception as e:
-            return f"Inference notice: {e}"
+# 1. ZeroGPU Inference Function
+@spaces.GPU
+def predict_ner(text: str):
+    if not text or not text.strip():
+        return "Please provide clinical text."
+    try:
+        model = model_manager.get_ner_model()
+        results = model.predict(text)
+        if not results:
+            return "No biomedical entities detected."
+        return "\n".join([f"• [{e.label}] {e.text} (Confidence: {round((e.confidence or 1.0)*100, 1)}%)" for e in results])
+    except Exception as e:
+        return f"Inference notice: {e}"
 
-# 2. Gradio Blocks Interface (Keeps ZeroGPU active permanently)
+# 2. Gradio Interface (Provides the @spaces.GPU event hook for ZeroGPU supervisor)
 with gr.Blocks(title="SanjeevaniAI Healthcare Intelligence") as demo:
     gr.Markdown("# 🏥 SanjeevaniAI — Healthcare Intelligence Engine")
     gr.Markdown(
@@ -56,38 +34,9 @@ with gr.Blocks(title="SanjeevaniAI Healthcare Intelligence") as demo:
     btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
     btn.click(fn=predict_ner, inputs=inp, outputs=out)
 
-# 3. Add CORS middleware to demo.app for Vercel
-demo.app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# 4. Initialize Database and ML models at startup
-@demo.app.on_event("startup")
-async def startup_init():
-    await init_db()
-    try:
-        model_manager.initialize()
-    except Exception as e:
-        print(f"ML Model initialization: {e}")
-
-# 5. Include all REST API routes (/api/v1/ner/analyze, /api/v1/chat, /api/v1/auth, etc.)
-demo.app.include_router(api_router, prefix="/api/v1")
-
-# 6. Override health route to always return JSON (fixes browser HTML 500 issue)
-@demo.app.get("/api/v1/health", response_class=JSONResponse, tags=["Health"])
-async def direct_health():
-    return JSONResponse(
-        content={
-            "status": "healthy",
-            "app": settings.APP_NAME,
-            "version": settings.APP_VERSION,
-            "hardware": "ZeroGPU",
-        }
-    )
+# 3. Mount Gradio under /ui so FastAPI controls root / and /api/v1/ with ZERO SvelteKit interference
+app = gr.mount_gradio_app(fastapi_app, demo, path="/ui")
 
 if __name__ == "__main__":
-    demo.launch()
+    port = int(os.environ.get("PORT", 7860))
+    uvicorn.run(app, host="0.0.0.0", port=port)
