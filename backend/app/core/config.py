@@ -1,7 +1,8 @@
-from typing import List, Union
+from typing import List, Union, Any
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
+import json
 
 BASE_DIR = Path(__file__).resolve().parents[3]
 
@@ -26,20 +27,31 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 120
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # CORS
-    CORS_ORIGINS: List[str] = [
+    # CORS (Supports plain string, comma-separated, JSON list, or wildcard)
+    CORS_ORIGINS: Any = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000",
+        "*",
     ]
 
     @field_validator("CORS_ORIGINS", mode="before")
-    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
-        if isinstance(v, str) and not v.startswith("["):
-            return [i.strip() for i in v.split(",")]
-        elif isinstance(v, (list, str)):
-            return v
-        raise ValueError(v)
+    def assemble_cors_origins(cls, v: Any) -> List[str]:
+        if isinstance(v, str):
+            v_str = v.strip()
+            if v_str == "*" or not v_str:
+                return ["*"]
+            if v_str.startswith("[") and v_str.endswith("]"):
+                try:
+                    parsed = json.loads(v_str)
+                    if isinstance(parsed, list):
+                        return [str(item) for item in parsed]
+                except Exception:
+                    pass
+            return [i.strip() for i in v_str.split(",") if i.strip()]
+        elif isinstance(v, (list, tuple)):
+            return [str(i) for i in v]
+        return ["*"]
 
     # Database
     DATABASE_URL: str = f"sqlite+aiosqlite:///{BASE_DIR / 'sanjeevani.db'}"
