@@ -12,6 +12,7 @@ from backend.app.ml.manager import model_manager
 from backend.app.core.database import init_db
 from backend.app.core.config import settings
 
+# ZeroGPU synchronous worker
 if has_spaces:
     @spaces.GPU
     def predict_ner(text: str):
@@ -41,7 +42,7 @@ else:
 with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     gr.Markdown("# 🏥 SanjeevaniAI — Healthcare Intelligence API Engine")
     gr.Markdown(
-        "This Space powers the backend REST API for **SanjeevaniAI** (FastAPI + Local RoBERTa BC5CDR Named Entity Recognition on ZeroGPU).\n\n"
+        "This Space powers the backend REST API for **SanjeevaniAI** on ZeroGPU.\n\n"
         "- **API Health Endpoint**: `/api/v1/health`\n"
         "- **Interactive OpenAPI Swagger Docs**: `/docs`\n"
         "- **NER Analysis**: `/api/v1/ner/analyze`"
@@ -68,9 +69,9 @@ async def startup_event():
     try:
         model_manager.initialize()
     except Exception as e:
-        print(f"ML Model initialization warning: {e}")
+        print(f"ML Model initialization notice: {e}")
 
-# 3. Mount all REST API endpoints
+# 3. Mount all REST API endpoints under /api/v1
 demo.app.include_router(api_router, prefix="/api/v1")
 
 # 4. Convenience health check alias
@@ -79,4 +80,5 @@ async def root_health():
     return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    # Disable experimental SSR so SvelteKit does not block incoming POST requests
+    demo.launch(server_name="0.0.0.0", server_port=7860, ssr=False)
