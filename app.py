@@ -6,16 +6,9 @@ except ImportError:
 
 import os
 import gradio as gr
-from fastapi.middleware.cors import CORSMiddleware
 from backend.app.main import app as fastapi_app
 from backend.app.ml.manager import model_manager
 from backend.app.core.config import settings
-
-# Initialize model manager at startup
-try:
-    model_manager.initialize()
-except Exception as e:
-    print(f"ML Model initialization: {e}")
 
 # ZeroGPU worker function
 if has_spaces:
@@ -65,8 +58,3 @@ app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 @app.get("/health", tags=["Health"])
 async def root_health():
     return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"}
-
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 7860))
-    uvicorn.run("app:app", host="0.0.0.0", port=port)
