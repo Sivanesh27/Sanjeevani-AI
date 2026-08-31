@@ -13,7 +13,7 @@ from backend.app.ml.manager import model_manager
 from backend.app.core.database import init_db
 from backend.app.core.config import settings
 
-# ZeroGPU worker function
+# ZeroGPU synchronous worker function
 if has_spaces:
     @spaces.GPU
     def predict_ner(text: str):
@@ -70,12 +70,12 @@ async def startup_init():
     try:
         model_manager.initialize()
     except Exception as e:
-        print(f"ML Model initialization: {e}")
+        print(f"ML Model initialization notice: {e}")
 
 # Mount all FastAPI REST API routes
 demo.app.include_router(api_router, prefix="/api/v1")
 
-# Root status
+# Convenience root health check
 @demo.app.get("/health", tags=["Health"])
 async def root_health():
     return JSONResponse(content={"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"})
