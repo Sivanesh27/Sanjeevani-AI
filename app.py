@@ -6,8 +6,11 @@ except ImportError:
 
 import os
 import gradio as gr
-from backend.app.main import app as fastapi_app
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from backend.app.api.v1.router import api_router
 from backend.app.ml.manager import model_manager
+from backend.app.core.database import init_db
 from backend.app.core.config import settings
 
 # ZeroGPU worker function
@@ -51,10 +54,31 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
     btn.click(fn=predict_ner, inputs=inp, outputs=out)
 
-# Mount Gradio UI under /gradio so FastAPI handles root / and all /api/v1/ routes directly with zero SvelteKit interference
-app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
+# Enable CORS on Gradio's internal FastAPI app
+demo.app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Add convenience root health endpoint
-@app.get("/health", tags=["Health"])
+# Initialize database tables and models on startup
+@demo.app.on_event("startup")
+async def startup_init():
+    await init_db()
+    try:
+        model_manager.initialize()
+    except Exception as e:
+        print(f"ML Model initialization: {e}")
+
+# Mount all FastAPI REST API routes
+demo.app.include_router(api_router, prefix="/api/v1")
+
+# Root status
+@demo.app.get("/health", tags=["Health"])
 async def root_health():
-    return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"}
+    return JSONResponse(content={"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"})
+
+if __name__ == "__main__":
+    demo.launch()
