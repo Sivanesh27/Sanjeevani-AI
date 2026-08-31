@@ -6,15 +6,11 @@ except ImportError:
 
 import os
 import gradio as gr
+from fastapi.middleware.cors import CORSMiddleware
 from backend.app.api.v1.router import api_router
 from backend.app.ml.manager import model_manager
+from backend.app.core.database import init_db
 from backend.app.core.config import settings
-
-# Initialize model manager at startup
-try:
-    model_manager.initialize()
-except Exception as e:
-    print(f"ML Model initialization: {e}")
 
 if has_spaces:
     @spaces.GPU
@@ -56,17 +52,31 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
     btn.click(fn=predict_ner, inputs=inp, outputs=out)
 
-# Mount all FastAPI routes directly onto Gradio's internal web server
-@demo.app.get("/api/v1/health", tags=["Health"])
-def gradio_health():
-    return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION, "hardware": "ZeroGPU"}
+# 1. Enable full CORS for Vercel and cross-origin clients
+demo.app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@demo.app.get("/health", tags=["Health"])
-def root_health():
-    return {"status": "healthy", "app": settings.APP_NAME}
+# 2. Async startup event: initialize database schema & models
+@demo.app.on_event("startup")
+async def startup_event():
+    await init_db()
+    try:
+        model_manager.initialize()
+    except Exception as e:
+        print(f"ML Model initialization warning: {e}")
 
-# Include all REST API routes (/api/v1/auth, /api/v1/ner, /api/v1/documents, /api/v1/chat)
+# 3. Mount all REST API endpoints
 demo.app.include_router(api_router, prefix="/api/v1")
+
+# 4. Convenience health check alias
+@demo.app.get("/health", tags=["Health"])
+async def root_health():
+    return {"status": "healthy", "app": settings.APP_NAME, "version": settings.APP_VERSION}
 
 if __name__ == "__main__":
     demo.launch(server_name="0.0.0.0", server_port=7860)
