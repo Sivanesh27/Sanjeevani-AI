@@ -1,5 +1,6 @@
 import spaces  # ZeroGPU MUST be imported on line 1 before any framework
 import os
+import uvicorn
 import gradio as gr
 from backend.app.main import app as fastapi_app
 from backend.app.ml.manager import model_manager
@@ -31,8 +32,8 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
     btn.click(fn=predict_ner, inputs=inp, outputs=out)
 
-# Mount FastAPI app onto Gradio
-app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+# Mount Gradio UI into the FastAPI application
+app = gr.mount_gradio_app(fastapi_app, demo, path="/gradio")
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=7860)
