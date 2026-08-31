@@ -1,5 +1,7 @@
 import os
 import gradio as gr
+import uvicorn
+from backend.app.main import app as fastapi_app
 
 # ZeroGPU integration
 try:
@@ -28,5 +30,8 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     status_output = gr.Textbox(label="System Status", value="SanjeevaniAI Online")
     status_btn.click(check_status, outputs=status_output)
 
-from backend.app.main import app as fastapi_app
-app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+# Mount Gradio UI onto FastAPI
+gr.mount_gradio_app(fastapi_app, demo, path="/")
+
+if __name__ == "__main__":
+    uvicorn.run(fastapi_app, host="0.0.0.0", port=7860)
