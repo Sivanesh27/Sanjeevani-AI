@@ -1,6 +1,6 @@
 # SanjeevaniAI Python Dependencies
 
-# Core ML & NLP (Preserved & Integrated)
+# Core ML & NLP
 torch>=2.0.0
 transformers>=4.35.0
 datasets>=2.14.0
@@ -19,13 +19,15 @@ Pillow>=10.0.0
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
 python-dotenv>=1.0.0
+email-validator>=2.0.0
 
-# Backend Web Framework
+# Backend Web Framework & Gradio
 fastapi>=0.110.0
 uvicorn[standard]>=0.28.0
 python-multipart>=0.0.9
 httpx>=0.27.0
 aiofiles>=23.2.0
+gradio>=4.20.0
 
 # Database & Migrations
 sqlalchemy>=2.0.28
@@ -36,7 +38,6 @@ greenlet>=3.0.3
 
 # Security & Authentication
 python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
 bcrypt>=4.0.1
 
 # Document Processing (PDF & Clinical text extraction)
@@ -44,7 +45,7 @@ pypdf>=4.1.0
 pdfplumber>=0.10.4
 docx2txt>=0.8
 
-# Background Tasks & Caching (Optional Redis/Celery)
+# Background Tasks & Caching (Optional)
 redis>=5.0.3
 
 # Testing & Quality

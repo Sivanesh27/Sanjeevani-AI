@@ -1,3 +1,14 @@
+---
+title: Sanjeevani Backend
+emoji: 🏥
+colorFrom: green
+colorTo: teal
+sdk: gradio
+sdk_version: 4.20.0
+app_file: app.py
+pinned: false
+---
+
 # SanjeevaniAI — Industry-Grade Healthcare AI Platform
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
