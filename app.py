@@ -2,6 +2,7 @@ import os
 import gradio as gr
 import uvicorn
 from backend.app.main import app as fastapi_app
+from backend.app.ml.manager import model_manager
 
 # ZeroGPU integration
 try:
@@ -10,13 +11,32 @@ try:
 except ImportError:
     HAS_SPACES = False
 
-def check_status():
-    return "✅ SanjeevaniAI Clinical Backend & RoBERTa-large BC5CDR NER are online and ready."
-
+# Explicit @spaces.GPU function bound to Gradio event for ZeroGPU verification
 if HAS_SPACES:
-    @spaces.GPU
-    def gpu_health():
-        return "ZeroGPU Accelerated"
+    @spaces.GPU(duration=60)
+    def gradio_ner_predict(text: str):
+        if not text or not text.strip():
+            return "Please provide clinical text."
+        try:
+            model = model_manager.get_ner_model()
+            entities = model.predict(text)
+            if not entities:
+                return "No entities detected."
+            return "\n".join([f"• [{e.label}] '{e.text}' (Confidence: {round((e.confidence or 1.0)*100, 1)}%)" for e in entities])
+        except Exception as e:
+            return f"Inference notice: {e}"
+else:
+    def gradio_ner_predict(text: str):
+        if not text or not text.strip():
+            return "Please provide clinical text."
+        try:
+            model = model_manager.get_ner_model()
+            entities = model.predict(text)
+            if not entities:
+                return "No entities detected."
+            return "\n".join([f"• [{e.label}] '{e.text}' (Confidence: {round((e.confidence or 1.0)*100, 1)}%)" for e in entities])
+        except Exception as e:
+            return f"Inference notice: {e}"
 
 with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
     gr.Markdown("# 🏥 SanjeevaniAI — Healthcare Intelligence API Engine")
@@ -26,9 +46,11 @@ with gr.Blocks(title="SanjeevaniAI Healthcare API") as demo:
         "- **Interactive OpenAPI Swagger Docs**: `/docs`\n"
         "- **NER Analysis**: `/api/v1/ner/analyze`"
     )
-    status_btn = gr.Button("Verify API Health", variant="primary")
-    status_output = gr.Textbox(label="System Status", value="SanjeevaniAI Online")
-    status_btn.click(check_status, outputs=status_output)
+    with gr.Row():
+        input_text = gr.Textbox(label="Test Clinical Text", value="Metformin 500mg prescribed for type 2 diabetes mellitus and hypertension.")
+        output_text = gr.Textbox(label="ZeroGPU Extracted Biomedical Entities")
+    run_btn = gr.Button("⚡ Run ZeroGPU Clinical NER", variant="primary")
+    run_btn.click(gradio_ner_predict, inputs=input_text, outputs=output_text)
 
 # Mount Gradio UI onto FastAPI
 gr.mount_gradio_app(fastapi_app, demo, path="/")
