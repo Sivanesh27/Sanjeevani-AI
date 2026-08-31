@@ -2,7 +2,7 @@
 title: Sanjeevani Backend
 emoji: 🏥
 colorFrom: green
-colorTo: teal
+colorTo: blue
 sdk: gradio
 sdk_version: 4.20.0
 app_file: app.py
