@@ -30,7 +30,6 @@ datasets/
 datasets/*
 
 # Legacy Prototype Folders
-app/
 clinical_engine/
 evaluation/
 rag/
