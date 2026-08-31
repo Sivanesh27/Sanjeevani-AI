@@ -10,10 +10,18 @@ from backend.app.repositories.audit_repo import AuditRepository
 from backend.app.api.deps import security_scheme, get_client_ip
 from backend.app.core.security import decode_token
 
+try:
+    import spaces
+    gpu_decorator = spaces.GPU
+except Exception:
+    def gpu_decorator(func):
+        return func
+
 router = APIRouter()
 
 
 @router.post("/analyze", response_model=NERResponse)
+@gpu_decorator
 async def analyze_biomedical_ner(
     request_body: NERRequest,
     request: Request,
