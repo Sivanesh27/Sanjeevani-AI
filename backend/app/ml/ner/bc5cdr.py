@@ -9,6 +9,14 @@ from backend.app.core.config import settings
 from backend.app.core.logger import logger
 from backend.app.core.exceptions import MLModelError
 
+# ZeroGPU decorator support
+try:
+    import spaces
+    gpu_decorator = spaces.GPU
+except (ImportError, Exception):
+    def gpu_decorator(func):
+        return func
+
 
 class BC5CDRNERModel(BaseNERModel):
     def __init__(self, model_path: Optional[str] = None):
@@ -54,6 +62,7 @@ class BC5CDRNERModel(BaseNERModel):
             self._is_loaded = False
             raise MLModelError(message=f"Model initialization failed: {str(e)}")
 
+    @gpu_decorator
     def predict(self, text: str) -> List[NEREntity]:
         if not self._is_loaded or self.pipeline is None:
             self.load()
@@ -103,7 +112,7 @@ class BC5CDRNERModel(BaseNERModel):
         return ModelInfo(
             name=self.model_name,
             version="1.0.0",
-            provider="RoBERTa-large BC5CDR",
+            provider="RoBERTa-large BC5CDR (ZeroGPU)",
             device=self.device,
             status="Loaded" if self._is_loaded else "Not Loaded",
         )
